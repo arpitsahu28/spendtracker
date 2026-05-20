@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}My Profile — Spendly{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+<script src="https://unpkg.com/lucide@latest"></script>
+{% endblock %}
+
+{% block content %}
+<div class="prof-page">
+
+    <!-- Section 1: User info card -->
+    <div class="prof-user-card">
+        <div class="prof-avatar">
+            {{ user.name.split()[0][0] }}{{ user.name.split()[-1][0] }}
+        </div>
+        <div class="prof-user-info">
+            <div class="prof-user-name">{{ user.name }}</div>
+            <div class="prof-user-email">{{ user.email }}</div>
+            <div class="prof-user-since">
+                <i data-lucide="calendar"></i>
+                Member since {{ user.member_since }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Summary stats -->
+    <div class="prof-stats">
+        <h2 class="prof-section-title">Overview</h2>
+        <div class="features-inner">
+            <div class="feature-card">
+                <div class="feature-icon"><i data-lucide="credit-card"></i></div>
+                <div class="feature-title">Total Spent</div>
+                <div class="prof-stat-value">{{ stats.total_spent }}</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i data-lucide="list"></i></div>
+                <div class="feature-title">Transactions</div>
+                <div class="prof-stat-value">{{ stats.transaction_count }}</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i data-lucide="tag"></i></div>
+                <div class="feature-title">Top Category</div>
+                <div class="prof-stat-value">{{ stats.top_category }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Transaction history table -->
+    <h2 class="prof-section-title">Recent Transactions</h2>
+    <div class="prof-table-wrap">
+        <table class="prof-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th class="col-right">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr>
+                    <td class="col-date">{{ tx.date }}</td>
+                    <td>{{ tx.description }}</td>
+                    <td><span class="badge badge--{{ tx.category | lower }}">{{ tx.category }}</span></td>
+                    <td class="col-right col-amount">{{ tx.amount }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section 4: Category breakdown -->
+    <h2 class="prof-section-title">Spending by Category</h2>
+    <div class="prof-breakdown">
+        {% for cat in categories %}
+        <div class="prof-bar-row">
+            <span class="prof-cat-name">{{ cat.name }}</span>
+            <div class="prof-bar-track">
+                <div class="prof-bar" style="--bar-width: {{ cat.percent }}%"></div>
+            </div>
+            <span class="prof-cat-amt">{{ cat.amount }}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>lucide.createIcons();</script>
+{% endblock %}

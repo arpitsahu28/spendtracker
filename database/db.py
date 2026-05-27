@@ -62,6 +62,89 @@ def get_user_by_email(email):
     return user
 
 
+def get_user_by_id(user_id):
+    conn = get_db()
+    user = conn.execute(
+        "SELECT id, name, email, created_at FROM users WHERE id = ?",
+        (user_id,),
+    ).fetchone()
+    conn.close()
+    return user
+
+
+def get_expense_stats(user_id):
+    conn = get_db()
+    row = conn.execute(
+        """
+        SELECT COUNT(*) AS transaction_count,
+               COALESCE(SUM(amount), 0) AS total_amount
+        FROM expenses WHERE user_id = ?
+        """,
+        (user_id,),
+    ).fetchone()
+    top = conn.execute(
+        """
+        SELECT category FROM expenses WHERE user_id = ?
+        GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1
+        """,
+        (user_id,),
+    ).fetchone()
+    conn.close()
+    return {
+        "total_spent":       f"${row['total_amount']:.2f}",
+        "transaction_count": row["transaction_count"],
+        "top_category":      top["category"] if top else "N/A",
+    }
+
+
+def get_expenses_by_user(user_id):
+    from datetime import datetime
+    conn = get_db()
+    rows = conn.execute(
+        """
+        SELECT date, description, category,
+               printf('$%.2f', amount) AS amount
+        FROM expenses WHERE user_id = ?
+        ORDER BY date DESC
+        """,
+        (user_id,),
+    ).fetchall()
+    conn.close()
+    return [
+        {
+            "date":        datetime.strptime(r["date"], "%Y-%m-%d").strftime("%b %d, %Y"),
+            "description": r["description"],
+            "category":    r["category"],
+            "amount":      r["amount"],
+        }
+        for r in rows
+    ]
+
+
+def get_category_breakdown(user_id):
+    conn = get_db()
+    rows = conn.execute(
+        """
+        SELECT category AS name, SUM(amount) AS raw_amount
+        FROM expenses WHERE user_id = ?
+        GROUP BY category ORDER BY raw_amount DESC
+        """,
+        (user_id,),
+    ).fetchall()
+    conn.close()
+    if not rows:
+        return []
+    total = sum(r["raw_amount"] for r in rows)
+    return [
+        {
+            "name":    r["name"],
+            "amount":  f"${r['raw_amount']:.2f}",
+            "percent": round(r["raw_amount"] / total * 100),
+        }
+        for r in rows
+    ]
+
+
 def seed_db():
     conn = get_db()
     count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]

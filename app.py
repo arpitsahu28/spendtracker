@@ -3,7 +3,10 @@ import sqlite3
 from flask import Flask, render_template, request, session, redirect, url_for, abort
 from werkzeug.security import check_password_hash
 
-from database.db import get_db, init_db, seed_db, create_user, get_user_by_email
+from database.db import (
+    get_db, init_db, seed_db, create_user, get_user_by_email,
+    get_user_by_id, get_expense_stats, get_expenses_by_user, get_category_breakdown,
+)
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-key-change-in-prod"
@@ -99,38 +102,21 @@ def profile():
     if not session.get("user_id"):
         return redirect(url_for("login"))
 
+    from datetime import datetime
+    db_user = get_user_by_id(session["user_id"])
+    if db_user is None:
+        abort(404)
+    member_since = datetime.fromisoformat(db_user["created_at"]).strftime("%b %Y")
     user = {
-        "name":         "Demo User",
-        "email":        "demo@spendly.com",
-        "member_since": "May 2026",
+        "name":         db_user["name"],
+        "email":        db_user["email"],
+        "member_since": member_since,
     }
+    stats = get_expense_stats(session["user_id"])
 
-    stats = {
-        "total_spent":       "$334.49",
-        "transaction_count": 8,
-        "top_category":      "Bills",
-    }
+    transactions = get_expenses_by_user(session["user_id"])
 
-    transactions = [
-        {"date": "May 17, 2026", "description": "Dinner out",             "category": "Food",          "amount": "$22.00"},
-        {"date": "May 14, 2026", "description": "Miscellaneous",          "category": "Other",         "amount": "$9.99"},
-        {"date": "May 12, 2026", "description": "New shoes",              "category": "Shopping",      "amount": "$80.00"},
-        {"date": "May 10, 2026", "description": "Streaming subscription", "category": "Entertainment", "amount": "$15.00"},
-        {"date": "May 08, 2026", "description": "Pharmacy",               "category": "Health",        "amount": "$30.00"},
-        {"date": "May 05, 2026", "description": "Electricity bill",       "category": "Bills",         "amount": "$120.00"},
-        {"date": "May 03, 2026", "description": "Monthly bus pass",       "category": "Transport",     "amount": "$45.00"},
-        {"date": "May 01, 2026", "description": "Lunch",                  "category": "Food",          "amount": "$12.50"},
-    ]
-
-    categories = [
-        {"name": "Bills",         "amount": "$120.00", "percent": 36},
-        {"name": "Shopping",      "amount": "$80.00",  "percent": 24},
-        {"name": "Transport",     "amount": "$45.00",  "percent": 13},
-        {"name": "Food",          "amount": "$34.50",  "percent": 10},
-        {"name": "Health",        "amount": "$30.00",  "percent": 9},
-        {"name": "Entertainment", "amount": "$15.00",  "percent": 4},
-        {"name": "Other",         "amount": "$9.99",   "percent": 3},
-    ]
+    categories = get_category_breakdown(session["user_id"])
 
     return render_template(
         "profile.html",

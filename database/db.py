@@ -72,6 +72,16 @@ def get_user_by_id(user_id):
     return user
 
 
+def create_expense(user_id, amount, category, date, description):
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO expenses (user_id, amount, category, date, description) VALUES (?, ?, ?, ?, ?)",
+        (user_id, amount, category, date, description),
+    )
+    conn.commit()
+    conn.close()
+
+
 def get_expense_stats(user_id, start_date=None, end_date=None):
     date_filter = "AND date BETWEEN ? AND ?" if (start_date and end_date) else ""
     base_params = (user_id, start_date, end_date) if (start_date and end_date) else (user_id,)

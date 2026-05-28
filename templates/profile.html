@@ -62,7 +62,10 @@
     </div>
 
     <!-- Section 4: Transaction history table -->
-    <h2 class="prof-section-title">Recent Transactions</h2>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+        <h2 class="prof-section-title" style="margin-bottom: 0;">Recent Transactions</h2>
+        <a href="{{ url_for('add_expense') }}" class="btn-primary">+ Add Expense</a>
+    </div>
     <div class="prof-table-wrap">
         <table class="prof-table">
             <thead>

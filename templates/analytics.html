@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% block title %}Analytics — Spendly{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+{% endblock %}
+
+{% block content %}
+<div class="anl-page">
+
+    <!-- Page header -->
+    <div class="anl-header">
+        <div>
+            <h1 class="anl-title">Analytics Overview</h1>
+            <p class="anl-sub">All-time spending breakdown</p>
+        </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="anl-kpi-grid">
+
+        <div class="anl-kpi" style="--kpi-color: #1a472a">
+            <div class="anl-kpi-bar"></div>
+            <div class="anl-kpi-top">
+                <span class="anl-kpi-label">Total Spend</span>
+                <div class="anl-kpi-icon"><i data-lucide="credit-card"></i></div>
+            </div>
+            <div class="anl-kpi-value">{{ stats.total_spent }}</div>
+            <div class="anl-kpi-meta">all time</div>
+        </div>
+
+        <div class="anl-kpi" style="--kpi-color: #c17f24">
+            <div class="anl-kpi-bar"></div>
+            <div class="anl-kpi-top">
+                <span class="anl-kpi-label">Transactions</span>
+                <div class="anl-kpi-icon"><i data-lucide="list"></i></div>
+            </div>
+            <div class="anl-kpi-value">{{ stats.transaction_count }}</div>
+            <div class="anl-kpi-meta">total entries</div>
+        </div>
+
+        <div class="anl-kpi" style="--kpi-color: #0891b2">
+            <div class="anl-kpi-bar"></div>
+            <div class="anl-kpi-top">
+                <span class="anl-kpi-label">Avg Monthly</span>
+                <div class="anl-kpi-icon"><i data-lucide="trending-up"></i></div>
+            </div>
+            <div class="anl-kpi-value">{{ avg_monthly }}</div>
+            <div class="anl-kpi-meta">per month</div>
+        </div>
+
+        <div class="anl-kpi" style="--kpi-color: #7c3aed">
+            <div class="anl-kpi-bar"></div>
+            <div class="anl-kpi-top">
+                <span class="anl-kpi-label">Top Category</span>
+                <div class="anl-kpi-icon"><i data-lucide="tag"></i></div>
+            </div>
+            <div class="anl-kpi-value anl-kpi-value--sm">{{ stats.top_category }}</div>
+            <div class="anl-kpi-meta">highest spend</div>
+        </div>
+
+    </div>
+
+    <!-- Charts row -->
+    <div class="anl-charts-row">
+
+        <!-- Spend trend -->
+        <div class="anl-card anl-trend-card">
+            <div class="anl-card-head">
+                <div>
+                    <h2 class="anl-card-title">Monthly Spend Trend</h2>
+                    <p class="anl-card-sub">Last 12 months · all categories</p>
+                </div>
+            </div>
+            <div class="anl-chart-wrap">
+                <canvas id="trend-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Category donut -->
+        <div class="anl-card anl-donut-card">
+            <div class="anl-card-head">
+                <div>
+                    <h2 class="anl-card-title">Category Breakdown</h2>
+                    <p class="anl-card-sub">All time · by spend</p>
+                </div>
+            </div>
+            <div class="anl-donut-wrap">
+                <canvas id="donut-chart"></canvas>
+            </div>
+            <div class="anl-donut-legend">
+                {% for cat in categories %}
+                <div class="anl-legend-row">
+                    <div class="anl-legend-dot anl-dot--{{ cat.name | lower }}"></div>
+                    <span class="anl-legend-name">{{ cat.name }}</span>
+                    <span class="anl-legend-pct">{{ cat.percent }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Recent transactions -->
+    <div class="anl-card anl-tx-card">
+        <div class="anl-card-head">
+            <h2 class="anl-card-title">Recent Transactions</h2>
+            <a href="{{ url_for('profile') }}" class="anl-view-all">View all</a>
+        </div>
+        <div class="anl-table-wrap">
+            <table class="anl-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th class="col-right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr>
+                        <td class="col-date">{{ tx.date }}</td>
+                        <td>{{ tx.description or '—' }}</td>
+                        <td><span class="badge badge--{{ tx.category | lower }}">{{ tx.category }}</span></td>
+                        <td class="col-right col-amount">{{ tx.amount }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="anl-empty">No transactions yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>lucide.createIcons();</script>
+<script>
+(function () {
+    const monthlyLabels = {{ monthly_labels | tojson }};
+    const monthlyData   = {{ monthly_data | tojson }};
+    const catLabels     = {{ categories | map(attribute='name') | list | tojson }};
+    const catPercents   = {{ categories | map(attribute='percent') | list | tojson }};
+
+    const CAT_COLORS = {
+        'food':          '#1a472a',
+        'transport':     '#c17f24',
+        'bills':         '#c0392b',
+        'health':        '#059669',
+        'entertainment': '#7c3aed',
+        'shopping':      '#ea580c',
+        'other':         '#6b7280',
+    };
+    function catColor(name) {
+        return CAT_COLORS[name.toLowerCase()] || '#a0a0a0';
+    }
+
+    // Spend trend chart
+    const trendCtx = document.getElementById('trend-chart');
+    if (trendCtx && monthlyData.length) {
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'Monthly Spend',
+                    data: monthlyData,
+                    borderColor: '#1a472a',
+                    backgroundColor: 'rgba(26, 71, 42, 0.07)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#1a472a',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' $' + ctx.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2 })
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'DM Sans', size: 11 }, color: '#6b6b6b' },
+                        border: { display: false }
+                    },
+                    y: {
+                        grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+                        ticks: {
+                            font: { family: 'DM Sans', size: 11 },
+                            color: '#6b6b6b',
+                            callback: v => '$' + v.toLocaleString()
+                        },
+                        border: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    // Category donut chart
+    const donutCtx = document.getElementById('donut-chart');
+    if (donutCtx && catLabels.length) {
+        new Chart(donutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{
+                    data: catPercents,
+                    backgroundColor: catLabels.map(catColor),
+                    borderWidth: 0,
+                    hoverOffset: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' ' + ctx.label + ': ' + ctx.parsed + '%'
+                        }
+                    }
+                },
+                cutout: '68%',
+            }
+        });
+    }
+})();
+</script>
+{% endblock %}

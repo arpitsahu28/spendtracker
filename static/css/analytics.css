@@ -1,0 +1,292 @@
+/* ------------------------------------------------------------------ */
+/* Analytics page                                                       */
+/* ------------------------------------------------------------------ */
+
+.anl-page {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+/* Header */
+.anl-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.anl-title {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.15;
+}
+
+.anl-sub {
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    margin: 0.25rem 0 0;
+}
+
+/* KPI grid */
+.anl-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.anl-kpi {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.25rem 1.1rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.anl-kpi-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--kpi-color);
+}
+
+.anl-kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.anl-kpi-label {
+    font-size: 0.7rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.anl-kpi-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--kpi-color) 12%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--kpi-color);
+}
+
+.anl-kpi-icon i,
+.anl-kpi-icon svg {
+    width: 14px;
+    height: 14px;
+    stroke: var(--kpi-color);
+}
+
+.anl-kpi-value {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: var(--ink);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+}
+
+.anl-kpi-value--sm {
+    font-size: 1.3rem;
+}
+
+.anl-kpi-meta {
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+}
+
+/* Shared card */
+.anl-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.4rem 1.5rem 1.5rem;
+}
+
+.anl-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.anl-card-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--ink);
+    margin: 0;
+    font-weight: 400;
+}
+
+.anl-card-sub {
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    margin: 0.2rem 0 0;
+}
+
+.anl-view-all {
+    font-size: 0.8rem;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+    margin-top: 0.1rem;
+}
+
+.anl-view-all:hover {
+    text-decoration: underline;
+}
+
+/* Charts row */
+.anl-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1rem;
+    align-items: start;
+}
+
+.anl-chart-wrap {
+    height: 220px;
+    position: relative;
+}
+
+/* Donut */
+.anl-donut-wrap {
+    height: 160px;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.anl-donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.anl-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.anl-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.anl-legend-name {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    flex: 1;
+}
+
+.anl-legend-pct {
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Legend dot colors — matching badge palette */
+.anl-dot--food          { background: #1a472a; }
+.anl-dot--transport     { background: #c17f24; }
+.anl-dot--bills         { background: #c0392b; }
+.anl-dot--health        { background: #059669; }
+.anl-dot--entertainment { background: #7c3aed; }
+.anl-dot--shopping      { background: #ea580c; }
+.anl-dot--other         { background: #6b7280; }
+
+/* Transactions table */
+.anl-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.anl-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.anl-table th {
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    padding: 0 0.75rem 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.anl-table td {
+    padding: 0.7rem 0.75rem 0.7rem 0;
+    border-bottom: 1px solid var(--border-soft);
+    color: var(--ink-soft);
+    vertical-align: middle;
+}
+
+.anl-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.anl-table tbody tr:hover td {
+    background: var(--paper-warm);
+}
+
+.col-right  { text-align: right; }
+.col-date   { color: var(--ink-muted); font-size: 0.82rem; white-space: nowrap; }
+.col-amount { font-variant-numeric: tabular-nums; font-weight: 500; color: var(--ink); }
+
+.anl-empty {
+    text-align: center;
+    color: var(--ink-faint);
+    padding: 2rem 0;
+    font-size: 0.875rem;
+}
+
+/* Category badges — reuse from profile */
+.badge {
+    display: inline-block;
+    padding: 0.2em 0.55em;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: capitalize;
+}
+
+.badge--food          { background: #e8f0eb; color: #1a472a; }
+.badge--transport     { background: #fdf3e3; color: #8b5a1a; }
+.badge--bills         { background: #fdecea; color: #a93226; }
+.badge--health        { background: #d1fae5; color: #065f46; }
+.badge--entertainment { background: #ede9fe; color: #5b21b6; }
+.badge--shopping      { background: #fff7ed; color: #9a3412; }
+.badge--other         { background: #f3f4f6; color: #4b5563; }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .anl-kpi-grid   { grid-template-columns: repeat(2, 1fr); }
+    .anl-charts-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 540px) {
+    .anl-page     { padding: 1.5rem 1rem 3rem; }
+    .anl-kpi-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .anl-title    { font-size: 1.4rem; }
+}

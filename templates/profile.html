@@ -46,7 +46,22 @@
         </div>
     </div>
 
-    <!-- Section 3: Transaction history table -->
+    <!-- Section 3: Date filter -->
+    <div class="prof-filter">
+        <form method="get" action="{{ url_for('profile') }}" class="prof-filter-form">
+            <label for="start_date">From</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date or '' }}">
+            <label for="end_date">To</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date or '' }}">
+            <button type="submit" class="btn-filter">Filter</button>
+            {% if start_date and end_date %}
+            <a href="{{ url_for('profile') }}" class="btn-filter-clear">Clear</a>
+            <span class="prof-filter-notice">Showing filtered results</span>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Section 4: Transaction history table -->
     <h2 class="prof-section-title">Recent Transactions</h2>
     <div class="prof-table-wrap">
         <table class="prof-table">

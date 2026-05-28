@@ -94,6 +94,81 @@
 }
 
 /* ------------------------------------------------------------------ */
+/* Date filter                                                         */
+/* ------------------------------------------------------------------ */
+
+.prof-filter {
+    margin-bottom: 1.5rem;
+}
+
+.prof-filter-form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.prof-filter-form label {
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    font-weight: 500;
+}
+
+.prof-filter-form input[type="date"] {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.4rem 0.65rem;
+    font-size: 0.875rem;
+    color: var(--ink-soft);
+    background: var(--paper-card);
+    font-family: var(--font-body);
+}
+
+.prof-filter-form input[type="date"]:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+}
+
+.btn-filter {
+    padding: 0.4rem 1rem;
+    background: var(--accent);
+    color: var(--paper-card);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-family: var(--font-body);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-filter:hover {
+    opacity: 0.88;
+}
+
+.btn-filter-clear {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    color: var(--ink-muted);
+    text-decoration: none;
+}
+
+.btn-filter-clear:hover {
+    background: var(--paper-warm);
+}
+
+.prof-filter-notice {
+    font-size: 0.78rem;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 500;
+}
+
+/* ------------------------------------------------------------------ */
 /* Transaction table                                                   */
 /* ------------------------------------------------------------------ */
 

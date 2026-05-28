@@ -151,6 +151,19 @@ def get_category_breakdown(user_id, start_date=None, end_date=None):
     ]
 
 
+def get_monthly_spend(user_id):
+    conn = get_db()
+    rows = conn.execute("""
+        SELECT month, total FROM (
+            SELECT strftime('%Y-%m', date) AS month, SUM(amount) AS total
+            FROM expenses WHERE user_id = ?
+            GROUP BY month ORDER BY month DESC LIMIT 12
+        ) ORDER BY month ASC
+    """, (user_id,)).fetchall()
+    conn.close()
+    return [{"month": r["month"], "total": round(r["total"], 2)} for r in rows]
+
+
 def seed_db():
     conn = get_db()
     count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]

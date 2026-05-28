@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash
 from database.db import (
     get_db, init_db, seed_db, create_user, get_user_by_email,
     get_user_by_id, get_expense_stats, get_expenses_by_user, get_category_breakdown,
+    get_monthly_spend,
 )
 
 app = Flask(__name__)
@@ -138,6 +139,34 @@ def profile():
         categories=categories,
         start_date=start_date,
         end_date=end_date,
+    )
+
+
+@app.route("/analytics")
+def analytics():
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    from datetime import datetime
+    user_id = session["user_id"]
+
+    stats = get_expense_stats(user_id)
+    categories = get_category_breakdown(user_id)
+    transactions = get_expenses_by_user(user_id)[:5]
+
+    monthly_raw = get_monthly_spend(user_id)
+    monthly_labels = [datetime.strptime(m["month"], "%Y-%m").strftime("%b '%y") for m in monthly_raw]
+    monthly_data = [m["total"] for m in monthly_raw]
+    avg_monthly = round(sum(monthly_data) / len(monthly_data), 2) if monthly_data else 0
+
+    return render_template(
+        "analytics.html",
+        stats=stats,
+        categories=categories,
+        transactions=transactions,
+        monthly_labels=monthly_labels,
+        monthly_data=monthly_data,
+        avg_monthly=f"${avg_monthly:.2f}",
     )
 
 

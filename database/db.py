@@ -72,22 +72,24 @@ def get_user_by_id(user_id):
     return user
 
 
-def get_expense_stats(user_id):
+def get_expense_stats(user_id, start_date=None, end_date=None):
+    date_filter = "AND date BETWEEN ? AND ?" if (start_date and end_date) else ""
+    base_params = (user_id, start_date, end_date) if (start_date and end_date) else (user_id,)
     conn = get_db()
     row = conn.execute(
-        """
+        f"""
         SELECT COUNT(*) AS transaction_count,
                COALESCE(SUM(amount), 0) AS total_amount
-        FROM expenses WHERE user_id = ?
+        FROM expenses WHERE user_id = ? {date_filter}
         """,
-        (user_id,),
+        base_params,
     ).fetchone()
     top = conn.execute(
-        """
-        SELECT category FROM expenses WHERE user_id = ?
+        f"""
+        SELECT category FROM expenses WHERE user_id = ? {date_filter}
         GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1
         """,
-        (user_id,),
+        base_params,
     ).fetchone()
     conn.close()
     return {
@@ -97,17 +99,19 @@ def get_expense_stats(user_id):
     }
 
 
-def get_expenses_by_user(user_id):
+def get_expenses_by_user(user_id, start_date=None, end_date=None):
     from datetime import datetime
+    date_filter = "AND date BETWEEN ? AND ?" if (start_date and end_date) else ""
+    base_params = (user_id, start_date, end_date) if (start_date and end_date) else (user_id,)
     conn = get_db()
     rows = conn.execute(
-        """
+        f"""
         SELECT date, description, category,
                printf('$%.2f', amount) AS amount
-        FROM expenses WHERE user_id = ?
+        FROM expenses WHERE user_id = ? {date_filter}
         ORDER BY date DESC
         """,
-        (user_id,),
+        base_params,
     ).fetchall()
     conn.close()
     return [
@@ -121,15 +125,17 @@ def get_expenses_by_user(user_id):
     ]
 
 
-def get_category_breakdown(user_id):
+def get_category_breakdown(user_id, start_date=None, end_date=None):
+    date_filter = "AND date BETWEEN ? AND ?" if (start_date and end_date) else ""
+    base_params = (user_id, start_date, end_date) if (start_date and end_date) else (user_id,)
     conn = get_db()
     rows = conn.execute(
-        """
+        f"""
         SELECT category AS name, SUM(amount) AS raw_amount
-        FROM expenses WHERE user_id = ?
+        FROM expenses WHERE user_id = ? {date_filter}
         GROUP BY category ORDER BY raw_amount DESC
         """,
-        (user_id,),
+        base_params,
     ).fetchall()
     conn.close()
     if not rows:

@@ -112,11 +112,23 @@ def profile():
         "email":        db_user["email"],
         "member_since": member_since,
     }
-    stats = get_expense_stats(session["user_id"])
 
-    transactions = get_expenses_by_user(session["user_id"])
+    start_date = None
+    end_date   = None
+    try:
+        s = request.args.get("start_date", "").strip()
+        e = request.args.get("end_date", "").strip()
+        if s and e:
+            datetime.strptime(s, "%Y-%m-%d")
+            datetime.strptime(e, "%Y-%m-%d")
+            start_date = s
+            end_date   = e
+    except ValueError:
+        pass
 
-    categories = get_category_breakdown(session["user_id"])
+    stats        = get_expense_stats(session["user_id"], start_date, end_date)
+    transactions = get_expenses_by_user(session["user_id"], start_date, end_date)
+    categories   = get_category_breakdown(session["user_id"], start_date, end_date)
 
     return render_template(
         "profile.html",
@@ -124,6 +136,8 @@ def profile():
         stats=stats,
         transactions=transactions,
         categories=categories,
+        start_date=start_date,
+        end_date=end_date,
     )
 
 

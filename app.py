@@ -5,8 +5,8 @@ from werkzeug.security import check_password_hash
 
 from database.db import (
     get_db, init_db, seed_db, create_user, get_user_by_email,
-    get_user_by_id, get_expense_stats, get_expenses_by_user, get_category_breakdown,
-    get_monthly_spend,
+    get_user_by_id, create_expense, get_expense_stats, get_expenses_by_user,
+    get_category_breakdown, get_monthly_spend,
 )
 
 app = Flask(__name__)
@@ -170,9 +170,37 @@ def analytics():
     )
 
 
-@app.route("/expenses/add")
+@app.route("/expenses/add", methods=["GET", "POST"])
 def add_expense():
-    return "Add expense — coming in Step 7"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        from datetime import datetime as dt
+        amount_str  = request.form.get("amount", "").strip()
+        category    = request.form.get("category", "").strip()
+        date_str    = request.form.get("date", "").strip()
+        description = request.form.get("description", "").strip()
+
+        try:
+            amount = float(amount_str)
+            if amount <= 0:
+                raise ValueError
+        except ValueError:
+            return render_template("add_expense.html", error="Amount must be a positive number.")
+
+        if not category:
+            return render_template("add_expense.html", error="Category is required.")
+
+        try:
+            dt.strptime(date_str, "%Y-%m-%d")
+        except ValueError:
+            return render_template("add_expense.html", error="Date must be a valid date.")
+
+        create_expense(session["user_id"], amount, category, date_str, description or None)
+        return redirect(url_for("profile"))
+
+    return render_template("add_expense.html")
 
 
 @app.route("/expenses/<int:id>/edit")
